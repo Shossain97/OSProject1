@@ -350,6 +350,7 @@ void create_process(CommandHolder holder) {
       }
     }
     child_run_command(holder.cmd);// This should be done in the child branch of a fork
+    exit(EXIT_SUCCESS);
   }
   else{
     if(p_in){
@@ -367,7 +368,8 @@ void create_process(CommandHolder holder) {
 
       }
   }
-  parent_run_command(holder.cmd); // This should be done in the parent branch of
+  parent_run_command(holder.cmd);
+  //wait() // This should be done in the parent branch of
                                   // a fork
 
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
