@@ -171,10 +171,13 @@ void run_kill(KillCommand cmd) {
 void run_pwd() {
   // TODO: Print the current working directory
   //IMPLEMENT_ME();
-  char* curDir=get_current_directory(True);
+  bool aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere;
+  char* curDir=get_current_directory(&aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere);
   printf("%s\n", curDir);
   //He said something about freeing but it's not here???
-
+if(aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere){
+  free(curDir);
+}
   // Flush the buffer before returning
   fflush(stdout);
 }
@@ -349,6 +352,7 @@ void create_process(CommandHolder holder) {
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
   //child_run_command(holder.cmd); // This should be done in the child branch of a fork
+}
 }
 
 // Run a list of commands
