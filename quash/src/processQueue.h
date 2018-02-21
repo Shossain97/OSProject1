@@ -10,3 +10,6 @@ typedef struct process{
 	char* cmd;
 	pid_t pid;
 }
+
+typedef struct processQueue{
+	process*
