@@ -170,7 +170,10 @@ void run_kill(KillCommand cmd) {
 // Prints the current working directory to stdout
 void run_pwd() {
   // TODO: Print the current working directory
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
+  char* curDir=get_current_directory(True);
+  printf("%s\n", curDir);
+  //He said something about freeing but it's not here???
 
   // Flush the buffer before returning
   fflush(stdout);
@@ -304,7 +307,44 @@ void create_process(CommandHolder holder) {
   (void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
-  IMPLEMENT_ME();
+  printf("create_process is currently in progress\n");
+  pid_t pid = fork();
+  if(pid==0){
+    if(p_in){
+      //some piping stuff
+    }
+    if(p_out){
+      //more pipe stuff
+    }
+    if(r_in){
+      //file redirects
+    }
+    if(r_out){
+      //file redirects probably some dups
+      if(r_app){
+
+      }
+    }
+    child_run_command(holder.cmd);// This should be done in the child branch of a fork
+  }
+  else{
+    if(p_in){
+      //some piping stuff
+    }
+    if(p_out){
+      //more pipe stuff
+    }
+    if(r_in){
+      //file redirects
+    }
+    if(r_out){
+      //file redirects probably some dups
+      if(r_app){
+
+      }
+      parent_run_command(holder.cmd); // This should be done in the parent branch of
+                                      // a fork
+  }
 
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
