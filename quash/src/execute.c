@@ -109,13 +109,19 @@ void run_echo(EchoCommand cmd) {
   // string is always NULL) list of strings.
   char** str = cmd.args;
 
+
   // TODO: Remove warning silencers
-  (void) str; // Silence unused variable warning
+//  (void) str; // Silence unused variable warning
 
   // TODO: Implement echo
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
   //while(str)
-
+  int iterator=0;
+  while(str[iterator]!=NULL){
+    printf("%s",str[iterator]);
+    iterator++;
+  }
+  printf("\n");
   // Flush the buffer before returning
   fflush(stdout);
 }
@@ -304,11 +310,11 @@ void create_process(CommandHolder holder) {
                                                // is true
 
   // TODO: Remove warning silencers
-  (void) p_in;  // Silence unused variable warning
-  (void) p_out; // Silence unused variable warning
-  (void) r_in;  // Silence unused variable warning
-  (void) r_out; // Silence unused variable warning
-  (void) r_app; // Silence unused variable warning
+  //(void) p_in;  // Silence unused variable warning
+  //(void) p_out; // Silence unused variable warning
+  //(void) r_in;  // Silence unused variable warning
+  //(void) r_out; // Silence unused variable warning
+  //(void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
   printf("create_process is currently in progress\n");
