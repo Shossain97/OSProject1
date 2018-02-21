@@ -48,7 +48,7 @@ const char* lookup_env(const char* env_var) {
   // TODO: Remove warning silencers
   (void) env_var; // Silence unused variable warning
 
-  return "???";
+  return getenv(env_var);
 }
 
 // Check the status of background jobs
@@ -114,6 +114,7 @@ void run_echo(EchoCommand cmd) {
 
   // TODO: Implement echo
   IMPLEMENT_ME();
+  //while(str)
 
   // Flush the buffer before returning
   fflush(stdout);
@@ -311,6 +312,7 @@ void create_process(CommandHolder holder) {
 
   // TODO: Setup pipes, redirects, and new process
   printf("create_process is currently in progress\n");
+  IMPLEMENT_ME();
   pid_t pid = fork();
   if(pid==0){
     if(p_in){
@@ -377,7 +379,11 @@ void run_script(CommandHolder* holders) {
   if (!(holders[0].flags & BACKGROUND)) {
     // Not a background Job
     // TODO: Wait for all processes under the job to complete
-    IMPLEMENT_ME();
+    //IMPLEMENT_ME();
+    printf("currently no waiting occurs in run_script line 381\n");
+    //create_process(holders[i]);
+
+    //
   }
   else {
     // A background job.
