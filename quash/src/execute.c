@@ -159,9 +159,9 @@ void run_cd(CDCommand cmd) {
 
 
   // TODO: Change directory
-  oldDir=(char*)get_current_dir_name();
+  oldDir=get_current_dir_name();
   chdir(dir);
-  newDir=(char*)get_current_dir_name();
+  newDir=get_current_dir_name();
 
   // TODO: Update the PWD environment variable to be the new current working
   // directory and optionally update OLD_PWD environment variable to be the old
@@ -366,9 +366,9 @@ void create_process(CommandHolder holder) {
       if(r_app){
 
       }
-      parent_run_command(holder.cmd); // This should be done in the parent branch of
-                                      // a fork
   }
+  parent_run_command(holder.cmd); // This should be done in the parent branch of
+                                  // a fork
 
   //parent_run_command(holder.cmd); // This should be done in the parent branch of
                                   // a fork
