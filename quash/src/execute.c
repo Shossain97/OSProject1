@@ -94,11 +94,13 @@ void run_generic(GenericCommand cmd) {
   char** args = cmd.args;
 
   // TODO: Remove warning silencers
-  (void) exec; // Silence unused variable warning
-  (void) args; // Silence unused variable warning
+  //(void) exec; // Silence unused variable warning
+  //(void) args; // Silence unused variable warning
 
   // TODO: Implement run generic
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
+  //Assuming this is like the piping lab
+  execvp(exec, args );
 
   perror("ERROR: Failed to execute program");
 }
@@ -145,6 +147,8 @@ void run_export(ExportCommand cmd) {
 void run_cd(CDCommand cmd) {
   // Get the directory name
   const char* dir = cmd.dir;
+  char* oldDir;
+  char* newDir;
 
   // Check if the directory is valid
   if (dir == NULL) {
@@ -152,12 +156,21 @@ void run_cd(CDCommand cmd) {
     return;
   }
 
+
+
   // TODO: Change directory
+  oldDir=(char*)get_current_dir_name();
+  chdir(dir);
+  newDir=(char*)get_current_dir_name();
 
   // TODO: Update the PWD environment variable to be the new current working
   // directory and optionally update OLD_PWD environment variable to be the old
   // working directory.
   IMPLEMENT_ME();
+  setenv("PWD", newDir,1 );
+  setenv("OLD_PWD", oldDir, 1);
+  free(oldDir);
+  free(newDir);
 }
 
 // Sends a signal to all processes contained in a job
