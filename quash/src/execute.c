@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "quash.h"
+#include "deque.h"
 /*just checkign if git works*/
 // Remove this and all expansion calls to it
 /**
@@ -23,6 +24,26 @@
 /***************************************************************************
  * Interface Functions
  ***************************************************************************/
+ typedef struct process{
+   pid_t pid;
+   char* cmd;
+
+ }process;
+
+IMPLEMENT_DEQUE_STRUCT(processList, process);
+PROTOTYPE_DEQUE(processList, process);
+IMPLEMENT_DEQUE(processList, process);
+
+ typedef struct Job{
+ 	processList processes;//the queue for processes
+ 	int id;
+ 	bool background;
+}Job;
+
+ IMPLEMENT_DEQUE_STRUCT(JobQueue, Job);
+ PROTOTYPE_DEQUE(JobQueue, Job);
+ IMPLEMENT_DEQUE(JobQueue, Job);
+
 
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
