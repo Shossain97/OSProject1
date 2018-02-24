@@ -38,13 +38,14 @@ IMPLEMENT_DEQUE(processList, process);
  	processList processes;//the queue for processes
  	int id;
  	bool background;
+	//pipes
 }Job;
 
  IMPLEMENT_DEQUE_STRUCT(JobQueue, Job);
  PROTOTYPE_DEQUE(JobQueue, Job);
  IMPLEMENT_DEQUE(JobQueue, Job);
 
-
+JobQueue Jobs;
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
@@ -64,10 +65,10 @@ const char* lookup_env(const char* env_var) {
   // to interpret variables from the command line and display the prompt
   // correctly
   // HINT: This should be pretty simple
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
 
   // TODO: Remove warning silencers
-  (void) env_var; // Silence unused variable warning
+  //(void) env_var; // Silence unused variable warning
 
   return getenv(env_var);
 }
@@ -187,7 +188,7 @@ void run_cd(CDCommand cmd) {
   // TODO: Update the PWD environment variable to be the new current working
   // directory and optionally update OLD_PWD environment variable to be the old
   // working directory.
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
   setenv("PWD", newDir,1 );
   setenv("OLD_PWD", oldDir, 1);
   free(oldDir);
