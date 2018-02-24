@@ -126,7 +126,6 @@ void run_generic(GenericCommand cmd) {
 
   // TODO: Implement run generic
   //IMPLEMENT_ME();
-  //Assuming this is like the piping lab
   execvp(exec, args );
 
   perror("ERROR: Failed to execute program");
@@ -340,7 +339,7 @@ void parent_run_command(Command cmd) {
  *
  * @sa Command CommandHolder
  */
-void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processList* aProcess) {
+void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processList* aProcessList) {
   // Read the flags field from the parser
   bool p_in  = holder.flags & PIPE_IN;
   bool p_out = holder.flags & PIPE_OUT;
@@ -370,7 +369,7 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
     }
     if(r_in){
       //file redirects
-      int inFile=open(holder.redirect_in,0);//returns int for close
+      int inFile=open(holder.redirect_in,0);//would not take O_RDONLY??
       dup2(inFile, STDIN_FILENO);
       close(inFile);
     }
@@ -397,18 +396,25 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
       //more pipe stuff
     }
     if(r_in){
-      //file redirects
+      int inFile=open(holder.redirect_in,0);
+      dup2(inFile, STDIN_FILENO);
+      close(inFile);
     }
     if(r_out){
-      //file redirects probably some dups
+        int outFile;
       if(r_app){
-
+        outFile=open(holder.redirect_out,O_APPEND);
       }
+      else{
+        outFile=open(holder.redirect_out,O_WRONLY);
+      }
+      dup2(outFile,STDOUT_FILENO);
+      close(outFile);
   }
   process backgroundProcess;
   backgroundProcess.pid=pid;
   backgroundProcess.cmd=holder.cmd;
-  push_front_processList(aProcess, backgroundProcess);
+  push_front_processList(aProcessList, backgroundProcess);
   parent_run_command(holder.cmd);
   //wait() // This should be done in the parent branch of
                                   // a fork
@@ -464,6 +470,7 @@ void run_script(CommandHolder* holders) {
     // TODO: Push the new job to the job queue
     if(wasCreated==0){
       Jobs = new_JobQueue(20);
+      wasCreated=1;
     }
     push_back_JobQueue(&Jobs, newJob);
 
