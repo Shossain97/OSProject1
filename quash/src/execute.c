@@ -13,6 +13,9 @@
 
 #include "quash.h"
 #include "deque.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 /*just checkign if git works*/
 // Remove this and all expansion calls to it
 /**
@@ -26,7 +29,7 @@
  ***************************************************************************/
  typedef struct process{
    pid_t pid;
-   char* cmd;
+   Command cmd;
 
  }process;
 
@@ -37,7 +40,7 @@ IMPLEMENT_DEQUE(processList, process);
  typedef struct Job{
  	processList processes;//the queue for processes
  	int id;
- 	bool background;
+ 	//bool background;
 	//pipes
 }Job;
 
@@ -46,6 +49,8 @@ IMPLEMENT_DEQUE(processList, process);
  IMPLEMENT_DEQUE(JobQueue, Job);
 
 JobQueue Jobs;
+int curJobId=0;
+int wasCreated=0;
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
@@ -142,7 +147,7 @@ void run_echo(EchoCommand cmd) {
   //while(str)
   int iterator=0;
   while(str[iterator]!=NULL){
-    printf("%s",str[iterator]);
+    printf("%s ",str[iterator]);
     iterator++;
   }
   printf("\n");
@@ -335,7 +340,7 @@ void parent_run_command(Command cmd) {
  *
  * @sa Command CommandHolder
  */
-void create_process(CommandHolder holder) {
+void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processList* aProcess) {
   // Read the flags field from the parser
   bool p_in  = holder.flags & PIPE_IN;
   bool p_out = holder.flags & PIPE_OUT;
@@ -353,7 +358,8 @@ void create_process(CommandHolder holder) {
 
   // TODO: Setup pipes, redirects, and new process
   printf("create_process is currently in progress\n");
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
+
   pid_t pid = fork();
   if(pid==0){
     if(p_in){
@@ -364,12 +370,21 @@ void create_process(CommandHolder holder) {
     }
     if(r_in){
       //file redirects
+      int inFile=open(holder.redirect_in,0);//returns int for close
+      dup2(inFile, STDIN_FILENO);
+      close(inFile);
     }
     if(r_out){
       //file redirects probably some dups
+      int outFile;
       if(r_app){
-
+        outFile=open(holder.redirect_out,O_APPEND);
       }
+      else{
+        outFile=open(holder.redirect_out,O_WRONLY);
+      }
+      dup2(outFile,STDOUT_FILENO);
+      close(outFile);
     }
     child_run_command(holder.cmd);// This should be done in the child branch of a fork
     exit(EXIT_SUCCESS);
@@ -390,6 +405,10 @@ void create_process(CommandHolder holder) {
 
       }
   }
+  process backgroundProcess;
+  backgroundProcess.pid=pid;
+  backgroundProcess.cmd=holder.cmd;
+  push_front_processList(aProcess, backgroundProcess);
   parent_run_command(holder.cmd);
   //wait() // This should be done in the parent branch of
                                   // a fork
@@ -414,24 +433,41 @@ void run_script(CommandHolder* holders) {
   }
 
   CommandType type;
+  Job newJob;
+  newJob.id=++curJobId;
+  newJob.processes=new_processList(20);
+
+
 
   // Run all commands in the `holder` array
   for (int i = 0; (type = get_command_holder_type(holders[i])) != EOC; ++i)
-    create_process(holders[i]);
+    create_process(holders[i], &newJob, i, &newJob.processes);
 
   if (!(holders[0].flags & BACKGROUND)) {
     // Not a background Job
     // TODO: Wait for all processes under the job to complete
     //IMPLEMENT_ME();
-    printf("currently no waiting occurs in run_script line 381\n");
+    //wait
+    while(!is_empty_processList(&newJob.processes)){
+      int status;
+      if(waitpid(peek_back_processList(&newJob.processes).pid, &status, 0)!=-1){
+        pop_back_processList(&newJob.processes);
+      }
+    }
+    //printf("currently no waiting occurs in run_script line 381\n");
     //create_process(holders[i]);
 
-    //
+    //get rid of job here
   }
   else {
     // A background job.
     // TODO: Push the new job to the job queue
-    IMPLEMENT_ME();
+    if(wasCreated==0){
+      Jobs = new_JobQueue(20);
+    }
+    push_back_JobQueue(&Jobs, newJob);
+
+    //IMPLEMENT_ME();
 
     // TODO: Once jobs are implemented, uncomment and fill the following line
     // print_job_bg_start(job_id, pid, cmd);
