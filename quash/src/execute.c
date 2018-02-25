@@ -28,9 +28,7 @@
  * Interface Functions
  ***************************************************************************/
  typedef struct process{
-   pid_t pid;
-   Command cmd;
-
+   pid_t pid;//it looks like a struct for this was not necessary but I'm not changing code now
  }process;
 
 IMPLEMENT_DEQUE_STRUCT(processList, process);
@@ -40,7 +38,7 @@ IMPLEMENT_DEQUE(processList, process);
  typedef struct Job{
  	processList processes;//the queue for processes
  	int id;
- 	//bool background;
+  const char* cmd;
 	//pipes
 }Job;
 
@@ -80,11 +78,50 @@ const char* lookup_env(const char* env_var) {
 
 // Check the status of background jobs
 void check_jobs_bg_status() {
-  // TODO: Check on the statuses of all processes belonging to all background
-  // jobs. This function should remove jobs from the jobs queue once all
-  // processes belonging to a job have completed.
-  IMPLEMENT_ME();
+  if(wasCreated==0||is_empty_JobQueue(&Jobs)){
+    //printf("No background Jobs!\n");
+    return;
+  }
+  Job job;
+  processList curProcesses;
+  process curProcess;
+  int processListSize;
+  bool finished;
+  pid_t processPid;
+  pid_t runningPid;
+  int status;
 
+
+  int jobsSize=length_JobQueue(&Jobs);
+  for(int i=0;i<jobsSize;i++){
+
+
+    job=pop_front_JobQueue(&Jobs);
+    curProcesses=job.processes;
+    finished=true;
+    //stillRunning=false;
+    processListSize=length_processList(&curProcesses);
+    for(int j=0;j<processListSize;j++){
+      curProcess = pop_front_processList(&curProcesses);
+      runningPid=waitpid(curProcess.pid, &status, WNOHANG);
+      if(runningPid==0){
+        //add back the process and job because they're still running
+        push_back_processList(&curProcesses, curProcess);
+        push_back_JobQueue(&Jobs, job);
+        finished=false;
+        break;//we done so we can break
+      }
+      else{
+        //push process on back in case if processes coming next aren't finished
+        push_back_processList(&curProcesses, curProcess);
+      }
+
+    }
+    if(finished){
+      print_job_bg_complete(job.id, peek_front_processList(&curProcesses).pid, job.cmd);
+    }
+
+  }
   // TODO: Once jobs are implemented, uncomment and fill the following line
   // print_job_bg_complete(job_id, pid, cmd);
 }
@@ -220,7 +257,7 @@ void run_pwd() {
   bool aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere;
   char* curDir=get_current_directory(&aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere);
   printf("%s\n", curDir);
-  //He said something about freeing but it's not here???
+  //Document said something about freeing but it's not here???
 if(aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere){
   free(curDir);
 }
@@ -356,7 +393,7 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
   //(void) r_app; // Silence unused variable warning
 
   // TODO: Setup pipes, redirects, and new process
-  printf("create_process is currently in progress\n");
+  //printf("create_process is currently in progress\n");
   //IMPLEMENT_ME();
 
   pid_t pid = fork();
@@ -413,7 +450,7 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
   }
   process backgroundProcess;
   backgroundProcess.pid=pid;
-  backgroundProcess.cmd=holder.cmd;
+  //backgroundProcess.cmd=holder.cmd;
   push_front_processList(aProcessList, backgroundProcess);
   parent_run_command(holder.cmd);
   //wait() // This should be done in the parent branch of
@@ -440,7 +477,7 @@ void run_script(CommandHolder* holders) {
 
   CommandType type;
   Job newJob;
-  newJob.id=++curJobId;
+
   newJob.processes=new_processList(20);
 
 
@@ -472,11 +509,13 @@ void run_script(CommandHolder* holders) {
       Jobs = new_JobQueue(20);
       wasCreated=1;
     }
+    newJob.id=curJobId++;
+    newJob.cmd=get_command_string();
     push_back_JobQueue(&Jobs, newJob);
 
     //IMPLEMENT_ME();
 
     // TODO: Once jobs are implemented, uncomment and fill the following line
-    // print_job_bg_start(job_id, pid, cmd);
+    print_job_bg_start(newJob.id, peek_front_processList(&newJob.processes).pid, newJob.cmd);
   }
 }
