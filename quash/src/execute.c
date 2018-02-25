@@ -428,7 +428,7 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
     }
     if(r_in){
       //file redirects
-      int inFile=open(holder.redirect_in,0);//would not take O_RDONLY??
+      int inFile=open(holder.redirect_in,O_RDWR);//would not take O_RDONLY??
       dup2(inFile, STDIN_FILENO);
       close(inFile);
     }
@@ -436,10 +436,10 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
       //file redirects probably some dups
       int outFile;
       if(r_app){
-        outFile=open(holder.redirect_out,O_APPEND);
+        outFile=open(holder.redirect_out,O_RDWR|O_CREAT|O_APPEND);
       }
       else{
-        outFile=open(holder.redirect_out,O_WRONLY);
+        outFile=open(holder.redirect_out,O_RDWR|O_CREAT|O_TRUNC);
       }
       dup2(outFile,STDOUT_FILENO);
       close(outFile);
