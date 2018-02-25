@@ -39,11 +39,11 @@ PROTOTYPE_DEQUE(processList, process);
 IMPLEMENT_DEQUE(processList, process);
 
  typedef struct Job{
- 	processList processes;//the queue for processes
+ 	processList processes;
  	int id;
   char* cmd;
   bool needsFree;
-	//pipes
+  int pipes[2][2];
 }Job;
 
 void destructor_job(Job* aJob){
@@ -60,7 +60,7 @@ void destructor_job(Job* aJob){
 JobQueue Jobs;
 int curJobId=0;
 int wasCreated=0;
-static int pipes[2][2];
+//static int pipes[2][2];
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
@@ -402,7 +402,7 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
     	int read_end =(curProcessNum-1)%2;
 
   if(p_out){
-    pipe(pipes[write_end]);
+    pipe(aJob->pipes[write_end]);
   }
 
   // TODO: Remove warning silencers
@@ -419,12 +419,12 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
   pid_t pid = fork();
   if(pid==0){
     if(p_in){
-      dup2(pipes[read_end][READ], STDIN_FILENO);
-      close(pipes[read_end][READ]);
+      dup2(aJob->pipes[read_end][READ], STDIN_FILENO);
+      //close(aJob->pipes[read_end][READ]);
     }
     if(p_out){
-      dup2(pipes[write_end][WRITE], STDIN_FILENO);
-      close(pipes[write_end][WRITE]);
+      dup2(aJob->pipes[write_end][WRITE], STDOUT_FILENO);
+      //close(aJob->pipes[write_end][WRITE]);
     }
     if(r_in){
       //file redirects
@@ -448,8 +448,13 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
     exit(EXIT_SUCCESS);
   }
   else{
+
     if(p_out){
-      close(pipes[write_end][WRITE]);
+      close(aJob->pipes[write_end][WRITE]);
+    }
+    if(p_in){
+      //dup2(aJob->pipes[read_end][READ], STDIN_FILENO);
+      close(aJob->pipes[read_end][READ]);
     }
     if(r_in){
       int inFile=open(holder.redirect_in,0);
@@ -510,10 +515,12 @@ void run_script(CommandHolder* holders) {
     // TODO: Wait for all processes under the job to complete
     //IMPLEMENT_ME();
     //wait
+    //process aProcess;
     while(!is_empty_processList(&newJob.processes)){
       int status;
       if(waitpid(peek_back_processList(&newJob.processes).pid, &status, 0)!=-1){
         pop_back_processList(&newJob.processes);
+        //free(&aProcess);
       }
     }
     newJob.needsFree=false;

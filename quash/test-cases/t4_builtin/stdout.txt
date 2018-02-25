@@ -1,2 +1,2 @@
-/home/s979h937/EECS/workspace/EECS678/Project1/OSProject1/quash/test-cases/t4_builtin/sandbox
-hello\\n 
+sandbox
+hello
