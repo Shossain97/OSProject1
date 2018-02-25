@@ -41,9 +41,17 @@ IMPLEMENT_DEQUE(processList, process);
  typedef struct Job{
  	processList processes;//the queue for processes
  	int id;
-  const char* cmd;
+  char* cmd;
+  bool needsFree;
 	//pipes
 }Job;
+
+void destructor_job(Job* aJob){
+  destroy_processList(&aJob->processes);
+  if(aJob->needsFree){
+    free(aJob->cmd);
+  }
+}
 
  IMPLEMENT_DEQUE_STRUCT(JobQueue, Job);
  PROTOTYPE_DEQUE(JobQueue, Job);
@@ -91,7 +99,7 @@ void check_jobs_bg_status() {
   process curProcess;
   int processListSize;
   bool finished;
-  pid_t processPid;
+  //pid_t processPid;
   pid_t runningPid;
   int status;
 
@@ -123,6 +131,8 @@ void check_jobs_bg_status() {
     }
     if(finished){
       print_job_bg_complete(job.id, peek_front_processList(&curProcesses).pid, job.cmd);
+      job.needsFree=true;
+      destructor_job(&job);
     }
 
   }
@@ -506,6 +516,8 @@ void run_script(CommandHolder* holders) {
         pop_back_processList(&newJob.processes);
       }
     }
+    newJob.needsFree=false;
+    destructor_job(&newJob);
     //printf("currently no waiting occurs in run_script line 381\n");
     //create_process(holders[i]);
 
@@ -519,6 +531,7 @@ void run_script(CommandHolder* holders) {
       wasCreated=1;
     }
     newJob.id=curJobId++;
+    newJob.needsFree=true;
     newJob.cmd=get_command_string();
     push_back_JobQueue(&Jobs, newJob);
 
