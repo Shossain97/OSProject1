@@ -282,7 +282,15 @@ if(aBoolThatNeedsToBePassedForFreesThatHeSaidWouldBeHere){
 // Prints all background jobs currently in the job list to stdout
 void run_jobs() {
   // TODO: Print background jobs
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
+   int jobsSize=length_JobQueue(&Jobs);
+   processList curProcesses;
+   for(int i=0; i<jobsSize; i++){
+     Job currentJob = pop_front_JobQueue(&Jobs);
+     curProcesses=currentJob.processes;
+     print_job(currentJob.id, peek_front_processList(&curProcesses).pid, currentJob.cmd);
+     push_back_JobQueue(&Jobs, currentJob);
+   }
 
   // Flush the buffer before returning
   fflush(stdout);
