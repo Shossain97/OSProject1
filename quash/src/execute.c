@@ -16,6 +16,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#define READ 0
+#define WRITE 1
 /*just checkign if git works*/
 // Remove this and all expansion calls to it
 /**
@@ -49,6 +52,7 @@ IMPLEMENT_DEQUE(processList, process);
 JobQueue Jobs;
 int curJobId=0;
 int wasCreated=0;
+static int pipes[2][2];
 // Return a string containing the current working directory.
 char* get_current_directory(bool* should_free) {
   // TODO: Get the current working directory. This will fix the prompt path.
@@ -384,6 +388,12 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
   bool r_out = holder.flags & REDIRECT_OUT;
   bool r_app = holder.flags & REDIRECT_APPEND; // This can only be true if r_out
                                                // is true
+	int write_end =curProcessNum%2;
+    	int read_end =(curProcessNum-1)%2;
+
+  if(p_out){
+    pipe(pipes[write_end]);
+  }
 
   // TODO: Remove warning silencers
   //(void) p_in;  // Silence unused variable warning
@@ -399,10 +409,12 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
   pid_t pid = fork();
   if(pid==0){
     if(p_in){
-      //some piping stuff
+      dup2(pipes[read_end][READ], STDIN_FILENO);
+      close(pipes[read_end][READ]);
     }
     if(p_out){
-      //more pipe stuff
+      dup2(pipes[write_end][WRITE], STDIN_FILENO);
+      close(pipes[write_end][WRITE]);
     }
     if(r_in){
       //file redirects
@@ -426,11 +438,8 @@ void create_process(CommandHolder holder, Job* aJob, int curProcessNum, processL
     exit(EXIT_SUCCESS);
   }
   else{
-    if(p_in){
-      //some piping stuff
-    }
     if(p_out){
-      //more pipe stuff
+      close(pipes[write_end][WRITE]);
     }
     if(r_in){
       int inFile=open(holder.redirect_in,0);
