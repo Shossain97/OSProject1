@@ -530,7 +530,7 @@ void run_script(CommandHolder* holders) {
       Jobs = new_JobQueue(20);
       wasCreated=1;
     }
-    newJob.id=curJobId++;
+    newJob.id=++curJobId;
     newJob.needsFree=true;
     newJob.cmd=get_command_string();
     push_back_JobQueue(&Jobs, newJob);
