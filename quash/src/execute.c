@@ -256,11 +256,26 @@ void run_kill(KillCommand cmd) {
   int job_id = cmd.job;
 
   // TODO: Remove warning silencers
-  (void) signal; // Silence unused variable warning
-  (void) job_id; // Silence unused variable warning
+  //(void) signal; // Silence unused variable warning
+  //(void) job_id; // Silence unused variable warning
+  processList curProcesses;
+  process curProcess;
+  int jobsSize=length_JobQueue(&Jobs);
+  for(int i=0; i<jobsSize; i++){
+    Job currentJob = pop_front_JobQueue(&Jobs);
+    int processListSize = length_processList(&curProcesses);
+    if(currentJob.id == job_id){
+      for(int j=0; j<processListSize; j++){
+        process temp = pop_front_processList(&curProcess.pid);
+        kill(temp, signal);
+        push_back_processList(&curProcesses, curProcess);
+      }
+    }
+    push_back_JobQueue(&Jobs, currentJob);
+  }
 
   // TODO: Kill all processes associated with a background job
-  IMPLEMENT_ME();
+  //IMPLEMENT_ME();
 }
 
 
