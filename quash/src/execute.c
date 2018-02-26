@@ -263,12 +263,12 @@ void run_kill(KillCommand cmd) {
   int jobsSize=length_JobQueue(&Jobs);
   for(int i=0; i<jobsSize; i++){
     Job currentJob = pop_front_JobQueue(&Jobs);
-    int processListSize = length_processList(&curProcesses);
+    int processListSize = length_processList(&currentJob.processes);
     if(currentJob.id == job_id){
       for(int j=0; j<processListSize; j++){
-        process temp = pop_front_processList(&curProcess.pid);
+        process temp = pop_front_processList(&currentJob.processes);
         kill(temp, signal);
-        push_back_processList(&curProcesses, curProcess);
+        push_back_processList(&currentJob.processes, temp);
       }
     }
     push_back_JobQueue(&Jobs, currentJob);
